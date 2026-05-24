@@ -41,6 +41,10 @@
     "target_2050_pct_change": -95,
     "pse_emissions_intensity_2023_lb_per_mwh": 877.5,
     "pse_emissions_intensity_2024_lb_per_mwh": 830.3,
-    "pse_emissions_intensity_2024_mtco2e_per_mwh": 0.377
+    "pse_emissions_intensity_2024_mtco2e_per_mwh": 0.377,
+    "canopy_pct_2016": 49.9127,
+    "canopy_area_acres_2016": 1476.72,
+    "city_area_acres": 2298.31,
+    "canopy_study_year": 2016
   }
 }

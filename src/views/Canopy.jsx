@@ -10,15 +10,19 @@ import { C_TO_CO2E, fmtNumber, fmtMTCO2e } from '../lib/format.js'
 import { Link } from 'react-router-dom'
 
 export default function Canopy({ data }) {
-  const { canopy } = data
+  const { canopy, manifest } = data
+  const cf = manifest.confirmed_figures
 
   const find = (metric) => canopy.find(r => r.metric === metric)
 
   const cover = find('Canopy cover')
+  const cityArea = find('Total city area')
+  const canopyArea = find('Canopy area')
+  const largestPatch = find('Largest continuous canopy area')
+  const tallestTree = find('Tallest tree')
   const stock = find('Total carbon stock')
   const seq = find('Annual net sequestration')
   const treeCount = find('Tree count estimate')
-  const canopyArea = find('Canopy area')
 
   return (
     <div>
@@ -27,6 +31,7 @@ export default function Canopy({ data }) {
         LFP's urban tree canopy acts as a carbon sink — sequestering CO₂ from the atmosphere annually
         and storing it as biomass. Under the GPC AFOLU sector (Agriculture, Forestry, and Other Land Use),
         this is reported as a negative emission (a sink) offsetting a share of gross community emissions.
+        Canopy area and cover are confirmed from the 2016 King County DNRP GIS study.
       </p>
 
       {/* Stat cards */}
@@ -38,24 +43,29 @@ export default function Canopy({ data }) {
           gap: 'var(--sp-4)',
         }}>
           <StatCard
-            label="Canopy Cover"
-            value={cover?.value != null ? `${cover.value}%` : '—'}
-            unit="of city land area"
-            subtext={`Year: ${cover?.year ?? '—'} · Method: ${cover?.method ?? '—'} · ${cover?.confirmed === 'yes' || cover?.confirmed === true ? 'Partial confirmation from LFP CAP' : 'Not confirmed'}`}
-            draft={cover?.confirmed !== 'yes' && cover?.confirmed !== true}
+            label="Canopy Cover (2016)"
+            value={cover?.value != null ? `${Number(cover.value).toFixed(1)}%` : '—'}
+            unit={`${fmtNumber(canopyArea?.value)} of ${fmtNumber(cityArea?.value)} acres`}
+            subtext="Confirmed from King County DNRP GIS parcel analysis. Study year 2016 — treat as approximate 2019 baseline."
+          />
+          <StatCard
+            label="Largest Canopy Patch"
+            value={largestPatch?.value != null ? `${fmtNumber(largestPatch.value)} ac` : '—'}
+            unit="contiguous canopy area"
+            subtext="Largest single uninterrupted canopy block, likely forested park land."
           />
           <StatCard
             label="Annual Net Sequestration"
             value={seq?.value != null ? fmtMTCO2e(seq.value) : 'NE'}
             unit="MTCO₂e / year"
-            subtext="Requires i-Tree Eco or i-Tree Canopy assessment. Not yet estimated."
+            subtext="Requires i-Tree Eco or i-Tree Canopy assessment. Regional benchmarks suggest ~500–2,000 MTCO₂e/yr."
             draft
           />
           <StatCard
             label="Total Carbon Stock"
             value={stock?.value != null ? fmtNumber(stock.value) : 'NE'}
             unit={stock?.unit ?? 'tonnes C'}
-            subtext="Standing carbon stored in tree biomass. Requires i-Tree Eco run."
+            subtext="Standing carbon in tree biomass. Requires i-Tree Eco run."
             draft
           />
           <StatCard
@@ -150,32 +160,40 @@ export default function Canopy({ data }) {
       <div className="card" style={{ borderLeft: '4px solid var(--color-amber)', background: '#fff8f5', marginBottom: 'var(--sp-5)' }}>
         <h3 style={{ marginBottom: 8 }}>Canopy as a stock at risk</h3>
         <p style={{ marginBottom: 8, fontSize: 'var(--text-sm)' }}>
-          LFP's ~50% canopy cover is exceptional for a suburban community in the Pacific Northwest.
-          This canopy represents a significant carbon stock that must be protected to maintain the sink.
+          LFP's <strong>49.9% canopy cover — 1,476.72 acres out of 2,298.31 total city acres</strong> — is
+          exceptional for a suburban community in the Pacific Northwest. The canopy map shows most residential
+          parcels at &gt;50% cover (dark green), with the 244-acre largest continuous patch likely corresponding
+          to forested parks and open space. This canopy represents a significant carbon stock that must be protected.
           Key risks:
         </p>
         <ul style={{ fontSize: 'var(--text-sm)', margin: 0, paddingLeft: '1.25em' }}>
-          <li><strong>Development and impervious surface expansion</strong> — new construction removes canopy permanently</li>
-          <li><strong>Climate stress</strong> — drought, heat stress, and novel pests (e.g., spotted lanternfly, emerald ash borer moving north) threaten tree health</li>
+          <li><strong>Development and impervious surface expansion</strong> — the parcel-level map shows canopy gaps (red/orange parcels, &lt;15–25% cover) concentrated in the town center and along arterials; infill development extends these gaps</li>
+          <li><strong>Climate stress</strong> — drought, heat stress, and novel pests (spotted lanternfly, emerald ash borer moving north) threaten tree health</li>
           <li><strong>Storm damage</strong> — large conifer blowdowns are a recurring feature of LFP's climate</li>
         </ul>
         <p style={{ marginTop: 8, marginBottom: 0, fontSize: 'var(--text-sm)' }}>
           A formal <strong>i-Tree Canopy</strong> or <strong>i-Tree Eco</strong> assessment would quantify the
-          current stock, annual sequestration, and the value of canopy services. This is the recommended next step
-          for populating this view with real numbers. See <Link to="/methodology">Methodology §4</Link>.
+          current carbon stock, annual sequestration rate, and canopy service values. With the confirmed 1,477-acre
+          canopy area as input geometry, an i-Tree run is the logical next step. See <Link to="/methodology">Methodology §4</Link>.
         </p>
       </div>
 
       {/* How the sink relates to gross emissions */}
       <div className="card" style={{ borderLeft: '4px solid var(--color-forest)' }}>
         <h3 style={{ marginBottom: 8 }}>How the canopy sink relates to gross emissions</h3>
-        <p style={{ fontSize: 'var(--text-sm)', marginBottom: 0 }}>
+        <p style={{ fontSize: 'var(--text-sm)', marginBottom: 8 }}>
           Once quantified, the annual net sequestration (MTCO₂e/yr) can be compared directly to gross community
-          emissions. For context: at 50% canopy cover in a city of ~13,000 residents (area ~3,600 acres),
-          a rough proxy from regional i-Tree studies suggests sequestration on the order of <strong>hundreds to low-thousands
-          of MTCO₂e/yr</strong> — meaningful as a fraction of gross emissions but not sufficient to offset the
-          ~25,000 MTCO₂e/yr from on-road transportation alone. Protecting and expanding the canopy is a
-          co-benefit strategy (biodiversity, stormwater, heat island), not a primary decarbonization lever.
+          emissions. With <strong>1,476.72 confirmed canopy acres</strong> and the community core baseline
+          of <strong>47,427 MTCO₂e/yr</strong>, even a generous sequestration estimate would offset only a small
+          fraction of gross emissions. Pacific Northwest urban forest benchmarks (i-Tree regional studies) suggest
+          roughly <strong>0.3–1.5 MTCO₂e per canopy acre per year</strong>, implying LFP's canopy sequesters
+          approximately <strong>440–2,200 MTCO₂e/yr</strong> — about 1–5% of the core emissions baseline.
+        </p>
+        <p style={{ fontSize: 'var(--text-sm)', marginBottom: 0 }}>
+          This makes canopy a meaningful but secondary lever. Protecting and expanding the 1,477-acre canopy
+          delivers co-benefits (stormwater, heat island, biodiversity, air quality) that amplify its value well
+          beyond the carbon offset alone. The tallest tree — a 191-ft specimen in Big Tree Park — represents
+          the kind of legacy carbon stock that takes centuries to replace if lost.
         </p>
       </div>
     </div>
