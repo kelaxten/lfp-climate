@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build output (deployed via GitHub Actions)
+dist/
+
+# Vite
+.vite/
+
+# Editor
+.DS_Store
+*.local
