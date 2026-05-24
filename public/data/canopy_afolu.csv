@@ -1,0 +1,6 @@
+metric,value,unit,year,method,confirmed,source_id,notes
+Canopy cover,50,percent,2024,LFP-CAP-qualitative,partial,src-lfp-cap,"~50% canopy cover stated in LFP CAP. Qualitative/approximate; not from a formal i-Tree assessment."
+Total carbon stock,,tonnes_C,,i-Tree Eco,no,src-itree,"NE pending i-Tree Eco run. Carbon stock = standing carbon stored in trees."
+Annual net sequestration,,MTCO2e_per_yr,,i-Tree Eco,no,src-itree,"NE pending i-Tree run. This is the AFOLU sink flux (negative emissions). Convert measured tonnes C to CO2e via x44/12 in code, not in this CSV."
+Tree count estimate,,trees,,i-Tree Eco,no,src-itree,"NE pending i-Tree run."
+Canopy area,,acres,,i-Tree Canopy,no,src-itree,"NE. Derive from canopy % x city land area as interim proxy if needed, flagged as estimate."

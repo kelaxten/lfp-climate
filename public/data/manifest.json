@@ -1,0 +1,31 @@
+{
+  "city": "Lake Forest Park, WA",
+  "baseline_year": 2019,
+  "latest_year": 2023,
+  "gpc_version": "1.1",
+  "reporting_level": "BASIC (partial BASIC+)",
+  "last_updated": "2026-05-24",
+  "maintainer": "LFP Climate Hub",
+  "available_years": [2019, 2023],
+  "wedge_value_basis": "percent_of_2019",
+  "carbon_to_co2e_factor": 3.6667,
+  "disclaimer": "DRAFT FOR REVIEW. Several figures are pending reconciliation with primary source PDFs (the Cascadia Wedge Memo and Fehr & Peers VMT Study returned 403 errors during data collection). Confirmed figures are flagged in the data; unconfirmed values use the GPC notation key NE (Not Estimated) rather than estimates. Consumption-based (#6) and canopy/AFOLU (#7) figures require a King County CBEI downscale and an i-Tree assessment respectively, and are currently NE placeholders. Do not cite as final.",
+  "notation_keys": {
+    "IE": "Included Elsewhere",
+    "NE": "Not Estimated",
+    "NO": "Not Occurring",
+    "C": "Confidential"
+  },
+  "confirmed_figures": {
+    "on_road_total_2019_mtco2e": 25364,
+    "on_road_total_2022_mtco2e": 23322,
+    "on_road_total_2023_mtco2e": 23450,
+    "passenger_vehicle_2023_mtco2e": 23510,
+    "passenger_vmt_2023_miles": 56142000,
+    "bau_2050_pct_change": 26,
+    "abau_2050_pct_change": -56,
+    "target_2030_pct_change": -50,
+    "target_2040_pct_change": -75,
+    "target_2050_pct_change": -95
+  }
+}

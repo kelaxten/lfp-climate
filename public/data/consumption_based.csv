@@ -1,0 +1,7 @@
+category,value_mtco2e,pct_of_cbei,method,confirmed,source_id,notes
+Food,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE pending downscale of King County CBEI or spend-based EEIO estimate. Paris targets large cuts in food consumption emissions; high-income communities skew high."
+Goods,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE pending method. Embodied carbon in purchased goods — Scope 3 supply chain."
+Services,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE pending method."
+Construction,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE pending method. Embodied carbon in buildings/renovations — relevant given LFP median home value $928,700."
+Transport fuels,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE pending method. Note: overlaps with territorial on-road emissions — flag double-counting in UI."
+Total consumption-based,,,KC-PSREAP-CBEI,no,src-kc-cbei,"NE. Precedent: Edmonds WA found imported/consumption emissions ~44% larger than territorial emissions. LFP's wealthier profile likely implies an even larger gap. Requires explicit boundary/double-counting caveat."

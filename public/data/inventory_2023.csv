@@ -1,0 +1,10 @@
+gpc_refno,sector,subsector,scope,activity,value_mtco2e,notation_key,source_id,notes
+II.1.1,Transportation,On-road passenger vehicles,1,Passenger vehicle combustion (in-boundary + transboundary),23510,,src-fehrpeers-vmt,"Confirmed: passenger-vehicle emissions 2023 = 23510 MTCO2e on 56142000 VMT (Fehr & Peers). ~31% of community emissions before aviation."
+II.x.x,Transportation,On-road total (all vehicle classes),1,All on-road combustion (passenger + truck),23450,,src-fehrpeers-vmt,"Confirmed: total on-road 2023 = 23450 MTCO2e (Table 2). Note passenger-only (23510) and total (23450) are from different table cells in the source; reconcile rounding/scope against source PDF."
+I.x.x,Stationary Energy,Building natural gas (aggregate),1,Aggregate building gas combustion,,NE,src-cascadia-wedge,"Dominant residual source projected to 2050. Absolute 2023 value not transcribable from snippets — reconcile with updated 2025 inventory."
+I.x.x,Stationary Energy,Building electricity (aggregate),2,Grid electricity (PSE + SCL),,NE,src-pse-emissions,"On glide path to ~zero by 2030 under CETA. PSE eliminated coal as of Jan 1 2026. Absolute city-scale value not available."
+II.4.1,Transportation,Aviation (allocated),3,Air travel allocated to LFP residents,,NE,src-cascadia-wedge,"Largest single share (~32% of 'all'); income-allocated. Not transcribable."
+II.5.1,Transportation,Off-road equipment,1,Lawn/garden/construction equipment,,NE,src-cascadia-wedge,"~6% of 'all'. Not available."
+III.1.1,Waste,Solid waste disposal,3,Disposal of LFP-generated waste,,NE,src-psreap,"~2%. Scope 3 exported waste. Not available."
+IV.1,IPPU,Refrigerants (HFCs),1,Fugitive refrigerant emissions,,NE,src-cascadia-wedge,"~7% of 'all'. Aggregate only."
+V.1,AFOLU,Urban tree canopy (sink),1,Net carbon sequestration by urban canopy,,NE,src-itree,"Requires i-Tree run. See canopy_afolu.csv."
