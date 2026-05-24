@@ -42,21 +42,25 @@ export default function Dashboard({ data }) {
   const { manifest, inventory, wedge } = data
   const cf = manifest.confirmed_figures
 
-  // Build trend data from confirmed on-road totals
+  // Build trend data: community core total (2019 confirmed) + on-road (all years)
   const trendData = [
-    { year: 2019, 'On-road (confirmed)': cf.on_road_total_2019_mtco2e },
-    { year: 2022, 'On-road (confirmed)': cf.on_road_total_2022_mtco2e },
-    { year: 2023, 'On-road (confirmed)': cf.on_road_total_2023_mtco2e },
+    {
+      year: 2019,
+      'Community total (core)': cf.core_baseline_2019_mtco2e,
+      'On-road': cf.on_road_total_2019_mtco2e,
+    },
+    {
+      year: 2022,
+      'On-road': cf.on_road_total_2022_mtco2e,
+    },
+    {
+      year: 2023,
+      'On-road': cf.on_road_total_2023_mtco2e,
+    },
   ]
 
-  // Target overlay for trend chart
-  const baseline = cf.on_road_total_2019_mtco2e
-  const targetData = [
-    { year: 2019, Target: baseline },
-    { year: 2030, Target: baseline * 0.5 },
-    { year: 2040, Target: baseline * 0.25 },
-    { year: 2050, Target: baseline * 0.05 },
-  ]
+  // Target lines based on core community baseline
+  const baseline = cf.core_baseline_2019_mtco2e
 
   // Sector breakdown from latest inventory (only rows with confirmed values)
   const inv2023 = (inventory[2023] ?? []).filter(r => r.value_mtco2e != null)
@@ -82,9 +86,10 @@ export default function Dashboard({ data }) {
       {/* ---- Trend chart ---- */}
       <SectionCard title="📈 Emissions Trend">
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 12 }}>
-          Only on-road transportation has confirmed MTCO₂e values for multiple years.
-          The adopted community targets (−50% by 2030, −75% by 2040, −95% by 2050 vs. 2019) are shown as reference lines.
-          Full community trend requires reconciling natural gas, electricity, and aviation figures from source PDFs.
+          The 2019 community core total ({fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e) is the confirmed baseline
+          from the Cascadia Wedge Memo. On-road values are confirmed for 2019, 2022, and 2023 from the Fehr &amp; Peers VMT Study.
+          Stationary energy (natural gas, electricity) and waste are NE for years other than 2019 and are not shown.
+          Target lines reference the core-footprint baseline.
         </p>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={trendData} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
@@ -100,7 +105,8 @@ export default function Dashboard({ data }) {
               contentStyle={{ fontSize: 'var(--text-sm)' }}
             />
             <Legend />
-            <Bar dataKey="On-road (confirmed)" fill="#bf360c" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="Community total (core)" fill="#1565c0" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="On-road" fill="#bf360c" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
 
@@ -127,10 +133,10 @@ export default function Dashboard({ data }) {
         </div>
 
         <ChartCaption>
-          On-road emissions confirmed from Fehr &amp; Peers VMT Study (Table 2).
-          2019 baseline: {fmtNumber(cf.on_road_total_2019_mtco2e)} MTCO₂e → 2023: {fmtNumber(cf.on_road_total_2023_mtco2e)} MTCO₂e
-          ({(((cf.on_road_total_2023_mtco2e - cf.on_road_total_2019_mtco2e) / cf.on_road_total_2019_mtco2e) * 100).toFixed(1)}% change).
-          Full community total pending source PDF reconciliation.
+          2019 community core total ({fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e) confirmed from Cascadia Wedge Memo Table 1.
+          On-road ({fmtNumber(cf.on_road_total_2019_mtco2e)} → {fmtNumber(cf.on_road_total_2023_mtco2e)} MTCO₂e,{' '}
+          {(((cf.on_road_total_2023_mtco2e - cf.on_road_total_2019_mtco2e) / cf.on_road_total_2019_mtco2e) * 100).toFixed(1)}% change 2019–2023)
+          confirmed from Fehr &amp; Peers VMT Study Table 2. Stationary energy and waste sector values remain NE.
         </ChartCaption>
 
         <button onClick={() => setShowTrendTable(v => !v)} aria-expanded={showTrendTable}
@@ -138,14 +144,15 @@ export default function Dashboard({ data }) {
           {showTrendTable ? 'Hide' : 'Show'} data table
         </button>
         {showTrendTable && (
-          <table style={{ marginTop: 12 }} aria-label="On-road emissions trend data">
-            <caption style={{ textAlign: 'left', fontWeight: 600, fontSize: 'var(--text-sm)', padding: '4px 0' }}>On-road emissions trend</caption>
-            <thead><tr><th>Year</th><th>On-road MTCO₂e</th><th>Source</th></tr></thead>
+          <table style={{ marginTop: 12 }} aria-label="Emissions trend data">
+            <caption style={{ textAlign: 'left', fontWeight: 600, fontSize: 'var(--text-sm)', padding: '4px 0' }}>Emissions trend (confirmed values)</caption>
+            <thead><tr><th>Year</th><th style={{ textAlign: 'right' }}>Community total (core)</th><th style={{ textAlign: 'right' }}>On-road</th><th>Source</th></tr></thead>
             <tbody>
               {trendData.map(row => (
                 <tr key={row.year}>
                   <td>{row.year}</td>
-                  <td style={{ textAlign: 'right' }}>{fmtNumber(row['On-road (confirmed)'])}</td>
+                  <td style={{ textAlign: 'right' }}>{fmtNumber(row['Community total (core)']) ?? '—'}</td>
+                  <td style={{ textAlign: 'right' }}>{fmtNumber(row['On-road'])}</td>
                   <td><a href="https://www.cityoflfp.gov/DocumentCenter/View/12486/8_LFPVMT_Study_Final" target="_blank" rel="noopener noreferrer">Fehr &amp; Peers VMT Study ⚠</a></td>
                 </tr>
               ))}

@@ -9,7 +9,7 @@
   "available_years": [2019, 2023],
   "wedge_value_basis": "percent_of_2019",
   "carbon_to_co2e_factor": 3.6667,
-  "disclaimer": "DRAFT FOR REVIEW. Several figures are pending reconciliation with primary source PDFs (the Cascadia Wedge Memo and Fehr & Peers VMT Study returned 403 errors during data collection). Confirmed figures are flagged in the data; unconfirmed values use the GPC notation key NE (Not Estimated) rather than estimates. Consumption-based (#6) and canopy/AFOLU (#7) figures require a King County CBEI downscale and an i-Tree assessment respectively, and are currently NE placeholders. Do not cite as final.",
+  "disclaimer": "DRAFT FOR REVIEW. Primary source PDFs (Cascadia Wedge Memo, Fehr & Peers VMT Study) have been reviewed and wedge scenario and on-road figures are now confirmed. Stationary energy (natural gas, electricity) and waste sector absolute values remain NE pending additional source data. Consumption-based (#6) and canopy/AFOLU (#7) figures require a King County CBEI downscale and an i-Tree assessment respectively, and are currently NE placeholders. Do not cite as final.",
   "notation_keys": {
     "IE": "Included Elsewhere",
     "NE": "Not Estimated",
@@ -17,15 +17,34 @@
     "C": "Confidential"
   },
   "confirmed_figures": {
+    "core_baseline_2019_mtco2e": 47427,
+    "all_baseline_2019_mtco2e": 95996,
     "on_road_total_2019_mtco2e": 25364,
     "on_road_total_2022_mtco2e": 23322,
     "on_road_total_2023_mtco2e": 23450,
-    "passenger_vehicle_2023_mtco2e": 23510,
+    "passenger_vmt_2019_miles": 58551000,
+    "passenger_vmt_2022_miles": 55761000,
     "passenger_vmt_2023_miles": 56142000,
-    "bau_2050_pct_change": 26,
-    "abau_2050_pct_change": -56,
+    "total_vmt_2019_miles": 60438000,
+    "total_vmt_2022_miles": 57693000,
+    "total_vmt_2023_miles": 58089000,
+    "natural_gas_remaining_2050_core_mtco2e": 15358,
+    "aviation_remaining_2050_all_mtco2e": 17064,
+    "core_bau_2050_pct_change": 26,
+    "core_abau_2050_pct_change": -56,
+    "core_local_action_2050_pct_change": -65,
+    "all_bau_2050_pct_change": 19,
+    "all_abau_2050_pct_change": -32,
+    "all_local_action_2050_pct_change": -56,
     "target_2030_pct_change": -50,
     "target_2040_pct_change": -75,
-    "target_2050_pct_change": -95
+    "target_2050_pct_change": -95,
+    "pse_emissions_intensity_2023_lb_per_mwh": 877.5,
+    "pse_emissions_intensity_2024_lb_per_mwh": 830.3,
+    "pse_emissions_intensity_2024_mtco2e_per_mwh": 0.377,
+    "canopy_pct_2016": 49.9127,
+    "canopy_area_acres_2016": 1476.72,
+    "city_area_acres": 2298.31,
+    "canopy_study_year": 2016
   }
 }

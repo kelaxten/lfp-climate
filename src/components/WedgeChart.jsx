@@ -36,15 +36,20 @@ function interpolate(x, x0, y0, x1, y1) {
 /**
  * Build chart data from raw wedge rows.
  * Groups by scenario, sorts by year, interpolates missing intermediates.
+ * Returns both pct_of_2019 (for Y-axis) and absolute MTCO2e (for tooltip).
  */
 function buildChartData(wedgeRows, footprint = 'all') {
   const filtered = wedgeRows.filter((r) => r.footprint === footprint || r.footprint === '')
   const byScenario = {}
+  const byScenarioAbs = {}
 
   for (const row of filtered) {
-    if (!byScenario[row.scenario]) byScenario[row.scenario] = {}
+    if (!byScenario[row.scenario]) { byScenario[row.scenario] = {}; byScenarioAbs[row.scenario] = {} }
     if (row.value_pct_of_2019 != null) {
       byScenario[row.scenario][row.year] = row.value_pct_of_2019
+    }
+    if (row.value_mtco2e != null) {
+      byScenarioAbs[row.scenario][row.year] = row.value_mtco2e
     }
   }
 
@@ -54,10 +59,12 @@ function buildChartData(wedgeRows, footprint = 'all') {
     const point = { year }
     for (const scenario of scenarios) {
       const data = byScenario[scenario]
+      const dataAbs = byScenarioAbs[scenario]
       if (data[year] != null) {
         point[scenario] = data[year]
+        if (dataAbs[year] != null) point[`${scenario}_abs`] = dataAbs[year]
       } else {
-        // Find surrounding confirmed anchors
+        // Find surrounding confirmed anchors and interpolate
         const knownYears = Object.keys(data)
           .map(Number)
           .sort((a, b) => a - b)
@@ -67,6 +74,12 @@ function buildChartData(wedgeRows, footprint = 'all') {
           point[scenario] = Math.round(
             interpolate(year, before, data[before], after, data[after])
           )
+          // Interpolate absolute too if available
+          if (dataAbs[before] != null && dataAbs[after] != null) {
+            point[`${scenario}_abs`] = Math.round(
+              interpolate(year, before, dataAbs[before], after, dataAbs[after])
+            )
+          }
           point[`${scenario}_interpolated`] = true
         }
       }
@@ -77,6 +90,8 @@ function buildChartData(wedgeRows, footprint = 'all') {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
+  // Filter to only scenario lines (not _abs or _interpolated keys)
+  const scenarioEntries = payload.filter(p => !p.dataKey.includes('_'))
   return (
     <div
       role="tooltip"
@@ -89,12 +104,22 @@ const CustomTooltip = ({ active, payload, label }) => {
         fontSize: 'var(--text-sm)',
       }}
     >
-      <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
-      {payload.map((p) => (
-        <div key={p.dataKey} style={{ color: p.color, marginBottom: 2 }}>
-          {p.name}: <strong>{p.value}%</strong> of 2019
-        </div>
-      ))}
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>{label}</div>
+      {scenarioEntries.map((p) => {
+        const absKey = `${p.dataKey}_abs`
+        const absVal = p.payload[absKey]
+        return (
+          <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>
+            <strong>{p.name}</strong>:{' '}
+            <strong>{p.value}%</strong> of 2019
+            {absVal != null && (
+              <span style={{ color: '#555', fontWeight: 400 }}>
+                {' '}({absVal.toLocaleString()} MTCO₂e)
+              </span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
