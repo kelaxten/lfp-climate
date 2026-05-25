@@ -23,6 +23,14 @@ export default function Overview({ data }) {
   const community2023 = cf.communitywide_2023_mtco2e
   const seq = cf.tree_sequestration_2023_mtco2e ?? null
 
+  // Per-capita trend
+  const perCap2019 = cf.per_capita_2019_mtco2e
+  const perCap2022 = cf.per_capita_2022_mtco2e
+  const perCap2023 = cf.per_capita_2023_mtco2e
+  const perCapChange = perCap2023 != null && perCap2019 != null
+    ? ((perCap2023 - perCap2019) / perCap2019) * 100
+    : null
+
   return (
     <div>
       {/* Draft disclaimer */}
@@ -92,6 +100,15 @@ export default function Overview({ data }) {
           />
 
           <StatCard
+            label="Per-Capita Emissions (2023)"
+            value={perCap2023 != null ? `${perCap2023}` : '—'}
+            unit="MTCO₂e/person/yr"
+            subtext={`2019: ${perCap2019} → 2022: ${perCap2022} → 2023: ${perCap2023} MTCO₂e/person. ${perCapChange != null ? `${perCapChange > 0 ? '+' : ''}${perCapChange.toFixed(0)}% vs baseline.` : ''} WA state avg ~8–10 territorial.`}
+            trend={perCapChange != null ? (perCapChange < 0 ? 'down' : 'up') : null}
+            trendGood={false}
+          />
+
+          <StatCard
             label="2030 Adopted Target"
             value={`${cf.target_2030_pct_change}%`}
             unit="vs. 2019 baseline"
@@ -144,7 +161,10 @@ export default function Overview({ data }) {
             <tbody>
               {[
                 { label: 'Communitywide total 2019',       value: `${fmtNumber(cf.communitywide_2019_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: 'Communitywide total 2022',       value: `${fmtNumber(cf.communitywide_2022_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
                 { label: 'Communitywide total 2023',       value: `${fmtNumber(cf.communitywide_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: 'Per-capita 2019 / 2022 / 2023',  value: `${perCap2019} / ${perCap2022} / ${perCap2023} MTCO₂e/person`, status: '✓ Confirmed', source: 'Cascadia GHG Inventory (population data)' },
+                { label: 'Municipal operations 2023',      value: `${fmtNumber(cf.municipal_ops_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory (subset of community total)' },
                 { label: 'Buildings (stationary energy) 2023', value: `${fmtNumber(cf.buildings_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
                 { label: 'Transportation 2023',            value: `${fmtNumber(cf.transportation_2023_mtco2e)} MTCO₂e`,  status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
                 { label: '— of which air travel',          value: `${fmtNumber(cf.aviation_2023_mtco2e)} MTCO₂e`,        status: '✓ Confirmed', source: 'SeaTac fuel allocation' },
@@ -193,6 +213,11 @@ export default function Overview({ data }) {
               to: '/canopy',
               title: '🌲 Canopy & AFOLU',
               desc: `${canopyPct ? Number(canopyPct).toFixed(1) : '~50'}% canopy cover (${canopyAc ? fmtNumber(canopyAc) : '1,477'} ac). Sequesters ~${seq ? fmtNumber(Math.abs(seq)) : '5,550'} MTCO₂e/yr (ICLEI LEARN). Carbon stock still NE — i-Tree.`,
+            },
+            {
+              to: '/policy',
+              title: '🏛️ Policy Recommendations',
+              desc: 'Five strategies from the GHG Inventory Report — VMT reduction, EV infrastructure, building efficiency, electrification, and waste diversion — each sized against the 2030 target.',
             },
           ].map(({ to, title, desc }) => (
             <Link key={to} to={to} style={{ textDecoration: 'none' }}>

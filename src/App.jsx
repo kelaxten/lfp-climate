@@ -11,6 +11,7 @@ import Dashboard from './views/Dashboard.jsx'
 import Consumption from './views/Consumption.jsx'
 import Canopy from './views/Canopy.jsx'
 import Methodology from './views/Methodology.jsx'
+import Policy from './views/Policy.jsx'
 import { loadAllData } from './lib/loadData.js'
 
 function LoadingSkeleton() {
@@ -91,6 +92,7 @@ export default function App() {
             <Route path="/consumption" element={<Consumption  data={data} />} />
             <Route path="/canopy"      element={<Canopy       data={data} />} />
             <Route path="/methodology" element={<Methodology  data={data} />} />
+            <Route path="/policy"      element={<Policy       data={data} />} />
             <Route path="*"            element={
               <div style={{ textAlign: 'center', padding: 'var(--sp-8)' }}>
                 <h1>404 — Page not found</h1>
