@@ -226,6 +226,85 @@ export default function Dashboard({ data }) {
         )}
       </SectionCard>
 
+      {/* ---- Year-over-year change ---- */}
+      <SectionCard title="📊 What Changed? 2019 → 2023">
+        <p style={{ fontSize: 'var(--text-sm)', marginBottom: 16 }}>
+          Sector-by-sector changes from the 2019 baseline to the latest confirmed year (2023).
+          Overall emissions are essentially flat (+0.2%), masking diverging trends by sector.
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 'var(--sp-3)',
+          marginBottom: 16,
+        }}>
+          {(() => {
+            const base = trendData.find(r => r.year === 2019)
+            const latest = trendData.find(r => r.year === manifest.latest_year)
+            if (!base || !latest) return null
+
+            const totalChange = ((latest.total - base.total) / base.total) * 100
+
+            const sectorChanges = SECTOR_ORDER.map(s => {
+              const from = base[s] ?? 0
+              const to   = latest[s] ?? 0
+              const pct  = from > 0 ? ((to - from) / from) * 100 : null
+              return { sector: s, from, to, pct }
+            })
+
+            const allItems = [
+              { label: 'Total', from: base.total, to: latest.total, pct: totalChange, bold: true },
+              ...sectorChanges,
+            ]
+
+            return allItems.map(({ label, from, to, pct, bold }) => {
+              const isDown = pct != null && pct < 0
+              const isFlat = pct != null && Math.abs(pct) < 1
+              const cardBg  = isFlat  ? '#fafafa'
+                            : isDown  ? '#e8f5e9'
+                            :           '#fff8e1'
+              const valColor = isFlat  ? 'var(--text-muted)'
+                             : isDown  ? '#2e7d32'
+                             :           '#e65100'
+              const arrow = isFlat ? '→' : isDown ? '↓' : '↑'
+              return (
+                <div key={label} style={{
+                  background: cardBg,
+                  border: `1px solid ${isFlat ? 'var(--border)' : isDown ? '#a5d6a5' : '#ffcc80'}`,
+                  borderRadius: 6,
+                  padding: 'var(--sp-3)',
+                }}>
+                  <div style={{
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: 'var(--text-muted)',
+                    marginBottom: 4,
+                  }}>{label}</div>
+                  <div style={{
+                    fontSize: bold ? 'var(--text-2xl)' : 'var(--text-xl)',
+                    fontWeight: 800,
+                    color: valColor,
+                    lineHeight: 1.1,
+                  }}>
+                    {arrow} {pct != null ? `${Math.abs(pct).toFixed(1)}%` : '—'}
+                  </div>
+                  <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
+                    {fmtNumber(from)} → {fmtNumber(to)} MTCO₂e
+                  </div>
+                </div>
+              )
+            })
+          })()}
+        </div>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
+          Buildings up 21% partly due to electricity carbon-intensity accounting (SCL power-mix change in 2023),
+          not consumption growth. Transportation down 8% from EV uptake + shorter trips. AFOLU down 30% (less tree loss).
+          Source: Cascadia GHG Inventory Report, Table 3.
+        </p>
+      </SectionCard>
+
       {/* ---- Wedge chart ---- */}
       <SectionCard title="📉 Scenario Wedge Chart (2019–2050)">
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 12 }}>

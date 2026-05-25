@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { to: '/consumption',  label: 'Consumption'  },
   { to: '/canopy',       label: 'Canopy'       },
   { to: '/methodology',  label: 'Methodology'  },
+  { to: '/policy',       label: 'Policy'       },
 ]
 
 export default function Layout({ children, manifest }) {
