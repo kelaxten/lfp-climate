@@ -8,15 +8,15 @@ import { NOTATION_KEYS } from '../lib/gpc.js'
 
 // GPC completeness map — structured data for the table
 const COMPLETENESS = [
-  { sector: 'Stationary Energy', scope: 1, gpc: 'BASIC', coverage: 'Partial', gap: 'Building natural gas aggregate confirmed via Wedge Memo narrative (% share); absolute MTCO₂e not transcribed. Reconcile with Wedge Memo Table 1/2.' },
-  { sector: 'Stationary Energy', scope: 2, gpc: 'BASIC', coverage: 'NE', gap: 'City-scale electricity totals not available. PSE decarbonization path tracked but absolute value not compiled. PSE eliminated coal Jan 1 2026; CETA requires GHG-neutral by 2030.' },
-  { sector: 'Transportation (on-road)', scope: '1+3', gpc: 'BASIC', coverage: 'Confirmed', gap: 'Total on-road confirmed from Fehr & Peers VMT Study (Table 2). Scope 1 vs. 3 split NE (>90% transboundary).' },
-  { sector: 'Transportation (aviation)', scope: 3, gpc: 'BASIC+', coverage: 'NE', gap: '~32% of "all" emissions per Wedge Memo. Income-allocated per-capita method. Absolute not transcribed. Largest single NE gap.' },
-  { sector: 'Transportation (off-road)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~6% of "all" per Wedge Memo narrative. Not quantified at city scale.' },
-  { sector: 'Waste (solid)', scope: 3, gpc: 'BASIC', coverage: 'NE', gap: '~2% of emissions per framing. Exported waste = Scope 3. PSREAP has data; not yet compiled at LFP scale.' },
-  { sector: 'Waste (wastewater)', scope: 1, gpc: 'BASIC', coverage: 'NE', gap: 'Not estimated in any available LFP source.' },
-  { sector: 'IPPU (refrigerants)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~7% of "all" per Wedge Memo. HFC fugitive emissions; not speciated.' },
-  { sector: 'AFOLU (urban canopy)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: 'Canopy cover ~50% confirmed (qualitative). No i-Tree Eco/Canopy run completed. Sequestration NE.' },
+  { sector: 'Stationary Energy (nat. gas)', scope: 1, gpc: 'BASIC', coverage: 'NE', gap: 'Absolute MTCO₂e not yet extracted. Cascadia GHG Inventory Report (separate from Wedge Memo) contains this — pending PDF review.' },
+  { sector: 'Stationary Energy (electricity)', scope: 2, gpc: 'BASIC', coverage: 'NE', gap: 'City-scale electricity totals not available. PSE emissions intensity confirmed (0.377 MTCO₂e/MWh for 2024). CETA requires PSE to be GHG-neutral by 2030.' },
+  { sector: 'Transportation (on-road)', scope: '1+3', gpc: 'BASIC', coverage: 'Confirmed', gap: 'Total on-road 2019/2022/2023 confirmed from Fehr & Peers VMT Study Table 2. Scope 1 vs. 3 split NE (>90% transboundary).' },
+  { sector: 'Transportation (aviation)', scope: 3, gpc: 'BASIC+', coverage: 'NE', gap: 'Included in "all" footprint via Wedge Memo (income-allocated per-capita method). ~32% of all-footprint. Absolute value NE — largest remaining single-sector gap.' },
+  { sector: 'Transportation (off-road)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~6% of "all" per Wedge Memo. Not quantified at city scale.' },
+  { sector: 'Waste (solid + wastewater)', scope: '1+3', gpc: 'BASIC', coverage: 'NE', gap: 'Exported waste = Scope 3. PSREAP has waste data. Cascadia GHG Inventory Report expected to contain LFP-specific figures.' },
+  { sector: 'IPPU (refrigerants)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~7% of "all" per Wedge Memo. HFC fugitive emissions; not speciated at city scale.' },
+  { sector: 'AFOLU (urban canopy)', scope: 1, gpc: 'BASIC+', coverage: 'Partial', gap: 'Canopy area 1,476.72 ac (49.9%) confirmed from King County DNRP 2016 GIS study. Annual net sequestration and total carbon stock NE — i-Tree Eco/Canopy run needed.' },
+  { sector: 'Consumption-based (CBEI)', scope: 3, gpc: 'BASIC+', coverage: 'Partial', gap: 'Spend-based EEIO estimate: ~123,835 MTCO₂e (±30–40%). EPA SCF v1.3.0 × BLS CE 2019 5th quintile × 5,400 HH. Not confirmed — LFP-specific spending survey or KC PSREAP downscale needed.' },
 ]
 
 const COVERAGE_STYLES = {
@@ -126,31 +126,67 @@ export default function Methodology({ data }) {
 
       {/* §3 Open data questions */}
       <section aria-labelledby="open-heading" className="card" style={{ marginBottom: 'var(--sp-5)' }}>
-        <h2 id="open-heading">§3 Open Questions &amp; Deferred Items</h2>
+        <h2 id="open-heading">§3 Open Questions &amp; Data Gaps</h2>
+
+        {/* Status legend */}
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16, fontSize: 'var(--text-xs)' }}>
+          {[
+            { label: '✅ Resolved', bg: '#e8f5e9', color: '#1b5e20' },
+            { label: '🔶 Partial', bg: '#fff8e1', color: '#e65100' },
+            { label: '⏳ Open',    bg: '#fff3e0', color: '#bf360c' },
+          ].map(s => (
+            <span key={s.label} style={{ padding: '2px 8px', borderRadius: 3, background: s.bg, color: s.color, fontWeight: 600 }}>
+              {s.label}
+            </span>
+          ))}
+        </div>
+
         <ol style={{ paddingLeft: '1.25em', fontSize: 'var(--text-sm)' }}>
-          <li style={{ marginBottom: 12 }}>
-            <strong>403 fetch errors on primary PDFs.</strong> The Cascadia Consulting Wedge Memo
-            (<code>src-cascadia-wedge</code>) and Fehr &amp; Peers VMT Study (<code>src-fehrpeers-vmt</code>)
-            both returned HTTP 403 during research. Scenario percentages and on-road figures were confirmed
-            via indexed snippets and secondary coverage. <em>Before any public launch, confirm cell-level
-            figures against the source PDFs.</em>
+          <li style={{ marginBottom: 14 }}>
+            <span style={{ background: '#e8f5e9', color: '#1b5e20', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>✅ RESOLVED</span>
+            <strong>Primary PDF access (wedge memo + VMT study).</strong> The Cascadia Consulting Wedge Memo
+            and Fehr &amp; Peers VMT Study have been reviewed directly. All wedge scenario values (Tables 1 and 2)
+            and on-road figures (2019/2022/2023) are confirmed. A prior data error (core-footprint
+            BAU/ABAU/Local Action mislabeled as "all") was corrected in <code>wedge_scenarios.csv</code>.
           </li>
-          <li style={{ marginBottom: 12 }}>
-            <strong>PSREAP methodology change.</strong> King County PSREAP changed methodology between
-            2017, 2019, and 2022 data releases. Historical comparisons require back-casting to a consistent
-            method. This affects waste and any PSREAP-derived consumption-based figures.
+          <li style={{ marginBottom: 14 }}>
+            <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
+            <strong>Stationary energy &amp; waste absolute values.</strong> The Cascadia Wedge Memo covers
+            scenario trajectories but not the full sector breakdown with absolute MTCO₂e. The separate
+            <strong> Cascadia GHG Inventory Report</strong> (distinct from the Wedge Memo) is expected to
+            contain building natural gas, electricity, and waste sector absolute values for 2019.
+            Reconciling these will fill the largest remaining NE gaps in the GPC table.
           </li>
-          <li style={{ marginBottom: 12 }}>
-            <strong>Consumption-based inventory (#6).</strong> No CBEI currently exists for LFP.
-            Options: (A) downscale King County PSREAP CBEI by population/income share;
-            (B) spend-based EEIO using BLS Consumer Expenditure Survey stratified by LFP median income (~$150k+).
-            Option B is more transparent for a wealthy outlier community.
+          <li style={{ marginBottom: 14 }}>
+            <span style={{ background: '#e8f5e9', color: '#1b5e20', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>✅ RESOLVED</span>
+            <strong>Canopy cover (#7).</strong> The 2016 King County DNRP GIS study confirms: total city area
+            2,298.31 acres, canopy area 1,476.72 acres, canopy cover 49.9127%. Largest continuous canopy
+            patch: 244.66 acres. Tallest tree: 191 ft (Big Tree Park). Study year is 2016 — a 2019 or
+            current update has not been confirmed.
+          </li>
+          <li style={{ marginBottom: 14 }}>
+            <span style={{ background: '#fff8e1', color: '#e65100', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>🔶 PARTIAL</span>
+            <strong>Consumption-based inventory (#6).</strong> A spend-based EEIO estimate has been calculated:
+            ~123,835 MTCO₂e (±30–40%) using EPA Supply Chain GHG Emission Factors v1.3.0 × BLS Consumer
+            Expenditure Survey 2019 highest income quintile × 5,400 LFP households. This is 2.6× the
+            territorial core. Remaining steps: (A) validate spending assumptions against LFP-specific data;
+            (B) downscale King County PSREAP CBEI as a cross-check; (C) sub-categorize food (meat vs.
+            plant-based) and aviation. ⚠ Transport fuels in CBEI overlap with territorial Scope 1 on-road —
+            do not add together; these are separate accounting boundaries.
+          </li>
+          <li style={{ marginBottom: 14 }}>
+            <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
+            <strong>i-Tree assessment (AFOLU sequestration).</strong> With 1,476.72 confirmed canopy acres,
+            an <strong>i-Tree Canopy</strong> or <strong>i-Tree Eco</strong> run is the logical next step.
+            Regional Pacific Northwest benchmarks suggest ~0.3–1.5 MTCO₂e sequestered per canopy acre per year
+            (440–2,200 MTCO₂e/yr total — 1–5% offset of core emissions). USDA Forest Service tools are free;
+            contact WA DNR Urban &amp; Community Forestry program for facilitation.
           </li>
           <li>
-            <strong>i-Tree assessment (#7).</strong> LFP's ~50% canopy cover is confirmed qualitatively
-            from the CAP. To quantify the AFOLU sink, an <strong>i-Tree Canopy</strong> or
-            <strong>i-Tree Eco</strong> assessment is needed. USDA Forest Service provides these tools free.
-            Contact the WA DNR Urban &amp; Community Forestry program for assistance.
+            <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
+            <strong>PSREAP methodology consistency.</strong> King County PSREAP changed methodology between
+            2017, 2019, and 2022 data releases. Any historical comparison using PSREAP data (waste, consumption)
+            requires back-casting to a consistent method. Flag when using PSREAP-derived figures.
           </li>
         </ol>
       </section>
@@ -200,9 +236,97 @@ export function carbonToMTCO2e(carbonTonnes) {
         </p>
       </section>
 
-      {/* §6 Full source list */}
+      {/* §6 Download hub */}
+      <section aria-labelledby="downloads-heading" className="card" style={{ marginBottom: 'var(--sp-5)' }}>
+        <h2 id="downloads-heading">§6 Download All Data</h2>
+        <p style={{ fontSize: 'var(--text-sm)', marginBottom: 16 }}>
+          All data files are plain text (JSON/CSV) released under{' '}
+          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>.
+          Cite as: <em>LFP Climate Hub, Lake Forest Park Community GHG Inventory, {new Date().getFullYear()}.</em>
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 'var(--sp-3)' }}>
+          {[
+            {
+              file: 'manifest.json',
+              label: 'Manifest',
+              desc: 'City metadata, confirmed figures, baseline year, GPC version.',
+              icon: '🗂️',
+            },
+            {
+              file: 'sources.csv',
+              label: 'Source Registry',
+              desc: 'All citations, URLs, access dates, reliability notes.',
+              icon: '📚',
+            },
+            {
+              file: 'inventory_2019.csv',
+              label: 'GPC Inventory 2019',
+              desc: 'Full GPC sector × scope table with notation keys. Baseline year.',
+              icon: '📋',
+            },
+            {
+              file: 'inventory_2023.csv',
+              label: 'GPC Inventory 2023',
+              desc: 'GPC inventory for latest year. On-road confirmed; other sectors NE.',
+              icon: '📋',
+            },
+            {
+              file: 'wedge_scenarios.csv',
+              label: 'Wedge Scenarios',
+              desc: 'BAU, ABAU, Local Action, Target trajectories 2019–2050. Both footprints.',
+              icon: '📉',
+            },
+            {
+              file: 'consumption_based.csv',
+              label: 'Consumption CBEI',
+              desc: 'Spend-based EEIO estimate by category. ±30–40% uncertainty.',
+              icon: '🛒',
+            },
+            {
+              file: 'canopy_afolu.csv',
+              label: 'Canopy / AFOLU',
+              desc: 'Urban canopy metrics. Area/cover confirmed 2016; sequestration NE.',
+              icon: '🌲',
+            },
+          ].map(({ file, label, desc, icon }) => (
+            <a
+              key={file}
+              href={`${import.meta.env.BASE_URL}data/${file}`}
+              download
+              style={{ textDecoration: 'none' }}
+              aria-label={`Download ${label} (${file})`}
+            >
+              <div
+                className="card"
+                style={{
+                  display: 'flex', flexDirection: 'column', gap: 4,
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--color-forest-lt)'
+                  e.currentTarget.style.boxShadow = 'var(--shadow)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--border)'
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{icon} {label}</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--color-sky)', fontWeight: 600 }}>↓ {file.split('.')[1].toUpperCase()}</span>
+                </div>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{desc}</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--border)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>{file}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* §7 Full source list */}
       <section aria-labelledby="sources-heading" className="card">
-        <h2 id="sources-heading">§6 Source Registry</h2>
+        <h2 id="sources-heading">§7 Source Registry</h2>
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 12 }}>
           All {sources.length} sources. ⚠ = reliability note present; hover for details.
           Download: <a href={`${import.meta.env.BASE_URL}data/sources.csv`} download>sources.csv</a>
