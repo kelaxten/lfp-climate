@@ -59,10 +59,11 @@ export default function Consumption({ data }) {
     .map(r => ({ name: r.category, value: Math.round(r.value_mtco2e) }))
     .sort((a, b) => b.value - a.value)
 
-  // Comparison bar data: CBEI total vs territorial baselines
+  // Comparison bar data: CBEI total vs the authoritative territorial inventory
+  const territorial2019 = cf.communitywide_2019_mtco2e
   const compData = [
-    { name: 'Territorial\ncore 2019', value: cf.core_baseline_2019_mtco2e, fill: '#455a64', confirmed: true },
-    { name: 'Territorial\nall 2019',  value: cf.all_baseline_2019_mtco2e,  fill: '#607d8b', confirmed: true },
+    { name: 'Territorial\n2019', value: territorial2019, fill: '#455a64', confirmed: true },
+    { name: 'Territorial\n2023', value: cf.communitywide_2023_mtco2e, fill: '#607d8b', confirmed: true },
     { name: 'CBEI total\n(estimate)', value: totalCBEI ? Math.round(totalCBEI) : 0, fill: '#ff6f00', confirmed: false },
   ]
 
@@ -211,8 +212,8 @@ export default function Consumption({ data }) {
 
           {/* Screen-reader summary of comparison chart values */}
           <p className="sr-only">
-            Chart summary: Territorial core 2019 is {fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e (confirmed);
-            Territorial all 2019 is {fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e (confirmed);
+            Chart summary: Territorial communitywide 2019 is {fmtNumber(cf.communitywide_2019_mtco2e)} MTCO₂e (confirmed);
+            Territorial communitywide 2023 is {fmtNumber(cf.communitywide_2023_mtco2e)} MTCO₂e (confirmed);
             CBEI total estimate is {fmtNumber(Math.round(totalCBEI))} MTCO₂e (spend-based estimate, uncertainty ±30–40%).
           </p>
 
@@ -264,21 +265,21 @@ export default function Consumption({ data }) {
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial core 2019</td>
-                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e</td>
-                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC, Scope 1+2+3 local)</td>
+                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial 2019</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.communitywide_2019_mtco2e)} MTCO₂e</td>
+                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC, all sectors, gross)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial all 2019</td>
-                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e</td>
-                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC+, includes aviation + wider Scope 3)</td>
+                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial 2023</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.communitywide_2023_mtco2e)} MTCO₂e</td>
+                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (Cascadia GHG Inventory Report)</td>
                   </tr>
                   <tr style={{ background: '#fff3e0' }}>
                     <td style={{ padding: '4px 8px', fontWeight: 600 }}>CBEI total (estimate)</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>{fmtNumber(Math.round(totalCBEI))} MTCO₂e</td>
                     <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
                       Spend-based EEIO estimate ±30–40%.{' '}
-                      {((totalCBEI / cf.core_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger than territorial core.
+                      {((totalCBEI / territorial2019 - 1) * 100).toFixed(0)}% larger than territorial 2019.
                     </td>
                   </tr>
                 </tbody>
@@ -286,8 +287,8 @@ export default function Consumption({ data }) {
             </div>
 
             <ChartCaption id="chart-comp-caption">
-              Territorial figures confirmed from Cascadia Wedge Memo. CBEI is a spend-based EEIO estimate —
-              see methodology box below. Shaded bar = estimate only.
+              Territorial figures confirmed from the Cascadia GHG Inventory Report (2025). CBEI is a
+              spend-based EEIO estimate — see methodology box below. Shaded bar = estimate only.
             </ChartCaption>
           </figure>
         </div>
@@ -328,10 +329,11 @@ export default function Consumption({ data }) {
           <p>
             Our EEIO estimate of <strong>{fmtNumber(Math.round(totalCBEI))} MTCO₂e</strong> puts LFP's
             consumption footprint at approximately{' '}
-            <strong>{((totalCBEI / cf.core_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger
-            than the territorial core</strong> and{' '}
-            <strong>{((totalCBEI / cf.all_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger than the territorial all-footprint</strong>.
-            This aligns with published CBEI benchmarks for high-income suburban communities.
+            <strong>{((totalCBEI / territorial2019 - 1) * 100).toFixed(0)}% larger
+            than the {fmtNumber(territorial2019)} MTCO₂e territorial total</strong> (Cascadia GHG Inventory
+            Report, 2019). This aligns with published CBEI benchmarks for high-income suburban communities —
+            though note that the territorial inventory here already includes a large aviation Scope 3 component,
+            so the consumption gap is narrower than for cities that exclude air travel.
           </p>
         )}
         <p style={{ marginBottom: 0 }}>

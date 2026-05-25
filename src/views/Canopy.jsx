@@ -14,6 +14,7 @@ export default function Canopy({ data }) {
   const cf = manifest.confirmed_figures
 
   const find = (metric) => canopy.find(r => r.metric === metric)
+  const findYear = (metric, year) => canopy.find(r => r.metric === metric && String(r.year) === String(year))
 
   const cover = find('Canopy cover')
   const cityArea = find('Total city area')
@@ -21,8 +22,14 @@ export default function Canopy({ data }) {
   const largestPatch = find('Largest continuous canopy area')
   const tallestTree = find('Tallest tree')
   const stock = find('Total carbon stock')
-  const seq = find('Annual net sequestration')
+  const seq = findYear('Annual net sequestration', 2023) ?? find('Annual net sequestration')
+  const treeLoss = findYear('Tree loss emissions', 2023) ?? find('Tree loss emissions')
   const treeCount = find('Tree count estimate')
+
+  const community2023 = cf.communitywide_2023_mtco2e
+  const seqAbs = seq?.value != null ? Math.abs(seq.value) : null
+  const seqPctOfGross = seqAbs != null ? (seqAbs / community2023 * 100) : null
+  const netFlux = (seq?.value != null && treeLoss?.value != null) ? (treeLoss.value + seq.value) : null
 
   return (
     <div>
@@ -31,7 +38,8 @@ export default function Canopy({ data }) {
         LFP's urban tree canopy acts as a carbon sink — sequestering CO₂ from the atmosphere annually
         and storing it as biomass. Under the GPC AFOLU sector (Agriculture, Forestry, and Other Land Use),
         this is reported as a negative emission (a sink) offsetting a share of gross community emissions.
-        Canopy area and cover are confirmed from the 2016 King County DNRP GIS study.
+        Canopy area/cover are confirmed from the 2016 King County DNRP GIS study, and the annual
+        sequestration flux is now confirmed from the Cascadia GHG Inventory Report (ICLEI LEARN tool).
       </p>
 
       {/* Stat cards */}
@@ -55,24 +63,26 @@ export default function Canopy({ data }) {
             subtext="Largest single uninterrupted canopy block, likely forested park land."
           />
           <StatCard
-            label="Annual Net Sequestration"
-            value={seq?.value != null ? fmtMTCO2e(seq.value) : 'NE'}
+            label="Annual Sequestration (2023)"
+            value={seqAbs != null ? `−${fmtNumber(seqAbs)}` : 'NE'}
+            unit="MTCO₂e / year (sink)"
+            subtext={seqPctOfGross != null
+              ? `Confirmed via ICLEI LEARN (Cascadia GHG Inventory). Offsets ~${seqPctOfGross.toFixed(1)}% of gross communitywide emissions.`
+              : 'Requires assessment.'}
+          />
+          <StatCard
+            label="Net Land-Use Flux (2023)"
+            value={netFlux != null ? fmtNumber(netFlux) : '—'}
             unit="MTCO₂e / year"
-            subtext="Requires i-Tree Eco or i-Tree Canopy assessment. Regional benchmarks suggest ~500–2,000 MTCO₂e/yr."
-            draft
+            subtext={netFlux != null
+              ? `Tree loss (+${fmtNumber(treeLoss.value)}) minus sequestration (−${fmtNumber(seqAbs)}) = net sink. Loss is counted in the gross total; sequestration reported separately.`
+              : ''}
           />
           <StatCard
             label="Total Carbon Stock"
             value={stock?.value != null ? fmtNumber(stock.value) : 'NE'}
             unit={stock?.unit ?? 'tonnes C'}
-            subtext="Standing carbon in tree biomass. Requires i-Tree Eco run."
-            draft
-          />
-          <StatCard
-            label="Tree Count Estimate"
-            value={treeCount?.value != null ? fmtNumber(treeCount.value) : 'NE'}
-            unit="trees"
-            subtext="Requires i-Tree Eco or canopy survey."
+            subtext="Standing carbon in tree biomass (distinct from annual flux). Still requires an i-Tree Eco run."
             draft
           />
         </div>
@@ -172,9 +182,11 @@ export default function Canopy({ data }) {
           <li><strong>Storm damage</strong> — large conifer blowdowns are a recurring feature of LFP's climate</li>
         </ul>
         <p style={{ marginTop: 8, marginBottom: 0, fontSize: 'var(--text-sm)' }}>
-          A formal <strong>i-Tree Canopy</strong> or <strong>i-Tree Eco</strong> assessment would quantify the
-          current carbon stock, annual sequestration rate, and canopy service values. With the confirmed 1,477-acre
-          canopy area as input geometry, an i-Tree run is the logical next step. See <Link to="/methodology">Methodology §4</Link>.
+          The Cascadia GHG Inventory Report quantified the annual sequestration flux using ICLEI's
+          <strong> LEARN</strong> tool (Land Emissions And Removals Navigator) with LFP's GIS boundary.
+          A formal <strong>i-Tree Eco</strong> run would still add the standing <em>carbon stock</em> (currently NE)
+          and refine the flux estimate. With the confirmed 1,477-acre canopy area as input geometry, it remains
+          a worthwhile next step. See <Link to="/methodology">Methodology §4</Link>.
         </p>
       </div>
 
@@ -182,18 +194,21 @@ export default function Canopy({ data }) {
       <div className="card" style={{ borderLeft: '4px solid var(--color-forest)' }}>
         <h3 style={{ marginBottom: 8 }}>How the canopy sink relates to gross emissions</h3>
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 8 }}>
-          Once quantified, the annual net sequestration (MTCO₂e/yr) can be compared directly to gross community
-          emissions. With <strong>1,476.72 confirmed canopy acres</strong> and the community core baseline
-          of <strong>47,427 MTCO₂e/yr</strong>, even a generous sequestration estimate would offset only a small
-          fraction of gross emissions. Pacific Northwest urban forest benchmarks (i-Tree regional studies) suggest
-          roughly <strong>0.3–1.5 MTCO₂e per canopy acre per year</strong>, implying LFP's canopy sequesters
-          approximately <strong>440–2,200 MTCO₂e/yr</strong> — about 1–5% of the core emissions baseline.
+          The canopy sequesters a confirmed <strong>{seqAbs != null ? fmtNumber(seqAbs) : '~5,550'} MTCO₂e/yr</strong> (ICLEI LEARN,
+          2023), which offsets about <strong>{seqPctOfGross != null ? seqPctOfGross.toFixed(1) : '~5.8'}%</strong> of
+          gross communitywide emissions ({fmtNumber(community2023)} MTCO₂e). This is roughly{' '}
+          <strong>{seqAbs != null ? (seqAbs / 1476.72).toFixed(1) : '3.8'} MTCO₂e per canopy acre per year</strong> across
+          the 1,476.72-acre canopy — notably higher than generic regional i-Tree benchmarks (0.3–1.5 MTCO₂e/ac/yr),
+          reflecting LFP's dense, mature conifer-dominated canopy. Tree loss adds back{' '}
+          <strong>+{treeLoss?.value != null ? fmtNumber(treeLoss.value) : '510'} MTCO₂e/yr</strong> (counted in the
+          gross total), for a net land-use flux of <strong>{netFlux != null ? fmtNumber(netFlux) : '−5,040'} MTCO₂e/yr</strong>.
         </p>
         <p style={{ fontSize: 'var(--text-sm)', marginBottom: 0 }}>
-          This makes canopy a meaningful but secondary lever. Protecting and expanding the 1,477-acre canopy
-          delivers co-benefits (stormwater, heat island, biodiversity, air quality) that amplify its value well
-          beyond the carbon offset alone. The tallest tree — a 191-ft specimen in Big Tree Park — represents
-          the kind of legacy carbon stock that takes centuries to replace if lost.
+          This makes canopy a meaningful but secondary lever — it offsets a single-digit percentage of gross
+          emissions, far less than the cuts needed from aviation, buildings, and on-road transport. But protecting
+          and expanding the 1,477-acre canopy delivers co-benefits (stormwater, heat island, biodiversity, air quality)
+          that amplify its value well beyond the carbon offset alone. The tallest tree — a 191-ft specimen in Big Tree
+          Park — represents the kind of legacy carbon stock that takes centuries to replace if lost.
         </p>
       </div>
     </div>

@@ -19,6 +19,9 @@ export default function Overview({ data }) {
   const cbeTotal = cf.cbei_total_mtco2e_estimate ?? null
   const canopyPct = cf.canopy_pct_2016 ?? null
   const canopyAc  = cf.canopy_area_acres_2016 ?? null
+  const community2019 = cf.communitywide_2019_mtco2e
+  const community2023 = cf.communitywide_2023_mtco2e
+  const seq = cf.tree_sequestration_2023_mtco2e ?? null
 
   return (
     <div>
@@ -47,26 +50,26 @@ export default function Overview({ data }) {
           marginBottom: 'var(--sp-7)',
         }}>
 
-          {/* Core baseline — primary confirmed figure */}
+          {/* Communitywide total — primary confirmed figure */}
           <StatCard
-            label="Community Baseline (2019)"
-            value={fmtNumber(cf.core_baseline_2019_mtco2e)}
-            unit="MTCO₂e · core footprint"
-            subtext={`Confirmed from Cascadia Wedge Memo Table 1. All-footprint (incl. aviation): ${fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e.`}
+            label="Communitywide Total (2023)"
+            value={fmtNumber(community2023)}
+            unit="MTCO₂e · all sectors"
+            subtext={`Confirmed from Cascadia GHG Inventory Report. 2019 baseline: ${fmtNumber(community2019)} MTCO₂e. Roughly flat 2019→2023.`}
           />
 
           <StatCard
-            label="On-Road Emissions (2023)"
-            value={fmtNumber(onRoad2023)}
-            unit="MTCO₂e"
-            subtext={`Largest confirmed source. ${fmtNumber(Math.round(onRoad2023 / cf.core_baseline_2019_mtco2e * 100))}% of 2019 core baseline. Confirmed from Fehr & Peers VMT Study.`}
+            label="Largest Source: Air Travel"
+            value={fmtNumber(cf.aviation_2023_mtco2e)}
+            unit="MTCO₂e · 30% of 2023"
+            subtext={`Aviation, allocated to LFP residents by income. Exceeds on-road (${fmtNumber(onRoad2023)}). Scope 3 — reflects a wealthy, frequent-flyer community.`}
           />
 
           <StatCard
             label="On-Road Change 2019→2023"
             value={pctChange != null ? `${pctChange > 0 ? '+' : ''}${pctChange.toFixed(1)}%` : '—'}
             unit={`${fmtNumber(onRoad2019)} → ${fmtNumber(onRoad2023)} MTCO₂e`}
-            subtext="Progress toward −50% by 2030 target. On-road sector only."
+            subtext="Driven by shorter trips and EV uptake, not fewer trips. On-road sector only."
             trend={pctChange != null ? (pctChange < 0 ? 'down' : 'up') : null}
             trendGood={false}
           />
@@ -76,23 +79,23 @@ export default function Overview({ data }) {
             value={cbeTotal ? `~${fmtNumber(Math.round(cbeTotal / 1000) * 1000)}` : '—'}
             unit="MTCO₂e · ±30–40%"
             subtext={cbeTotal
-              ? `Spend-based EEIO estimate. ${((cbeTotal / cf.core_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger than territorial core. Excludes utilities.`
+              ? `Spend-based EEIO estimate. ${((cbeTotal / community2019 - 1) * 100).toFixed(0)}% larger than the territorial total. Excludes utilities.`
               : 'Not estimated. Requires CBEI analysis.'}
             draft
           />
 
           <StatCard
-            label="Urban Canopy Cover (2016)"
-            value={canopyPct != null ? `${Number(canopyPct).toFixed(1)}%` : '—'}
-            unit={canopyAc ? `${fmtNumber(canopyAc)} of ${fmtNumber(cf.city_area_acres)} acres` : ''}
-            subtext="Confirmed from King County DNRP 2016 GIS study. Exceptional for a suburban community. Carbon stock NE — i-Tree needed."
+            label="Canopy Sink (2023)"
+            value={seq != null ? `−${fmtNumber(Math.abs(seq))}` : '—'}
+            unit="MTCO₂e/yr sequestered"
+            subtext={`Confirmed via ICLEI LEARN. Offsets ~${seq != null ? Math.round(Math.abs(seq) / community2023 * 100) : '—'}% of gross emissions. ${canopyPct ? Number(canopyPct).toFixed(0) : '50'}% canopy cover (${canopyAc ? fmtNumber(canopyAc) : ''} ac).`}
           />
 
           <StatCard
             label="2030 Adopted Target"
             value={`${cf.target_2030_pct_change}%`}
             unit="vs. 2019 baseline"
-            subtext={`City Council goals: −50% by 2030, −75% by 2040, −95% by 2050. On-road progress so far: ${pctChange != null ? pctChange.toFixed(1) : '—'}%`}
+            subtext={`City Council goals: −50% by 2030, −75% by 2040, −95% by 2050. Target = ${fmtNumber(Math.round(community2019 * 0.5))} MTCO₂e by 2030.`}
             trend="down"
             trendGood={false}
           />
@@ -112,15 +115,16 @@ export default function Overview({ data }) {
         </p>
         <p>
           LFP reports at the <strong>BASIC</strong> level (stationary energy, on-road transport, waste)
-          with partial <strong>BASIC+</strong> coverage (aviation, off-road, IPPU, AFOLU). Several cells
-          remain <strong>NE</strong> — stationary energy and waste absolute values are the primary remaining
-          gaps. See the <Link to="/methodology">Methodology</Link> page for the full completeness map.
+          with <strong>BASIC+</strong> coverage (aviation, off-road, IPPU, AFOLU). The territorial inventory
+          is now <strong>fully populated</strong> for 2019, 2022, and 2023 from the Cascadia GHG Inventory
+          Report. See the <Link to="/methodology">Methodology</Link> page for the full completeness map.
         </p>
         <p style={{ margin: 0 }}>
           <strong>Why does this matter?</strong> LFP is a small, wealthy, car-dependent bedroom community
-          north of Seattle. Its primary lever is Transportation (on-road VMT) and building decarbonization
-          (natural gas phaseout). The consumption-based estimate (~{cbeTotal ? fmtNumber(Math.round(cbeTotal / 1000) * 1000) : 'TBD'} MTCO₂e)
-          shows the "true" footprint is substantially larger than the territorial total.
+          north of Seattle. Its biggest levers are <strong>air travel</strong> ({fmtNumber(cf.aviation_2023_mtco2e)} MTCO₂e),
+          on-road VMT, and building decarbonization (natural gas, {fmtNumber(cf.natural_gas_2023_mtco2e)} MTCO₂e).
+          The consumption-based estimate (~{cbeTotal ? fmtNumber(Math.round(cbeTotal / 1000) * 1000) : 'TBD'} MTCO₂e)
+          shows the "true" footprint is larger still than the {fmtNumber(community2023)} MTCO₂e territorial total.
         </p>
       </section>
 
@@ -139,15 +143,17 @@ export default function Overview({ data }) {
             </thead>
             <tbody>
               {[
-                { label: 'Community core baseline 2019',    value: `${fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia Wedge Memo Table 1' },
-                { label: 'Community all-footprint 2019',   value: `${fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e`,    status: '✓ Confirmed', source: 'Cascadia Wedge Memo Table 2' },
-                { label: 'On-road 2019',                   value: `${fmtNumber(cf.on_road_total_2019_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Fehr & Peers VMT Table 2' },
-                { label: 'On-road 2022',                   value: `${fmtNumber(cf.on_road_total_2022_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Fehr & Peers VMT Table 2' },
-                { label: 'On-road 2023',                   value: `${fmtNumber(cf.on_road_total_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Fehr & Peers VMT Table 2' },
-                { label: 'Stationary energy 2019',         value: 'NE',                                                   status: '⏳ Pending',   source: 'Cascadia GHG Inventory (needed)' },
+                { label: 'Communitywide total 2019',       value: `${fmtNumber(cf.communitywide_2019_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: 'Communitywide total 2023',       value: `${fmtNumber(cf.communitywide_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: 'Buildings (stationary energy) 2023', value: `${fmtNumber(cf.buildings_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: 'Transportation 2023',            value: `${fmtNumber(cf.transportation_2023_mtco2e)} MTCO₂e`,  status: '✓ Confirmed', source: 'Cascadia GHG Inventory Table 3' },
+                { label: '— of which air travel',          value: `${fmtNumber(cf.aviation_2023_mtco2e)} MTCO₂e`,        status: '✓ Confirmed', source: 'SeaTac fuel allocation' },
+                { label: '— of which on-road',             value: `${fmtNumber(cf.on_road_total_2023_mtco2e)} MTCO₂e`,   status: '✓ Confirmed', source: 'Fehr & Peers VMT Study' },
+                { label: 'Refrigerants (IPPU) 2023',       value: `${fmtNumber(cf.refrigerants_2023_mtco2e)} MTCO₂e`,    status: '✓ Confirmed', source: 'EPA national, pop-scaled' },
+                { label: 'Solid waste 2023',               value: `${fmtNumber(cf.solid_waste_2023_mtco2e)} MTCO₂e`,     status: '✓ Confirmed', source: 'EPA WARM + KC data' },
+                { label: 'Tree canopy sequestration 2023', value: `−${fmtNumber(Math.abs(cf.tree_sequestration_2023_mtco2e))} MTCO₂e`, status: '✓ Confirmed', source: 'ICLEI LEARN tool' },
                 { label: 'Consumption-based (CBEI) 2019',  value: cbeTotal ? `~${fmtNumber(Math.round(cbeTotal))} MTCO₂e ±30–40%` : 'NE', status: cbeTotal ? '~ Estimate' : '⏳ Pending', source: 'EPA SCF v1.3.0 × BLS CE 2019' },
-                { label: 'Canopy cover (2016)',             value: `${Number(cf.canopy_pct_2016).toFixed(1)}% (${fmtNumber(cf.canopy_area_acres_2016)} ac)`, status: '✓ Confirmed', source: 'KC DNRP 2016 GIS study' },
-                { label: 'Canopy sequestration',           value: 'NE',                                                   status: '⏳ Pending',   source: 'i-Tree assessment (needed)' },
+                { label: 'Canopy carbon stock',            value: 'NE',                                                   status: '⏳ Pending',   source: 'i-Tree Eco run (needed)' },
               ].map(({ label, value, status, source }) => (
                 <tr key={label}>
                   <td style={{ fontWeight: 500, fontSize: 'var(--text-sm)' }}>{label}</td>
@@ -186,7 +192,7 @@ export default function Overview({ data }) {
             {
               to: '/canopy',
               title: '🌲 Canopy & AFOLU',
-              desc: `${canopyPct ? Number(canopyPct).toFixed(1) : '~50'}% canopy cover confirmed (${canopyAc ? fmtNumber(canopyAc) : '1,477'} ac). Carbon stock & sequestration NE — i-Tree assessment needed.`,
+              desc: `${canopyPct ? Number(canopyPct).toFixed(1) : '~50'}% canopy cover (${canopyAc ? fmtNumber(canopyAc) : '1,477'} ac). Sequesters ~${seq ? fmtNumber(Math.abs(seq)) : '5,550'} MTCO₂e/yr (ICLEI LEARN). Carbon stock still NE — i-Tree.`,
             },
           ].map(({ to, title, desc }) => (
             <Link key={to} to={to} style={{ textDecoration: 'none' }}>

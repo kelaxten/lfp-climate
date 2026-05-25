@@ -128,11 +128,12 @@ function parseCanopyRows(rows, sourceMap) {
  */
 export async function loadAllData() {
   // Load in parallel for performance
-  const [manifest, sources, inv2019, inv2023, wedge, consumption, canopy] =
+  const [manifest, sources, inv2019, inv2022, inv2023, wedge, consumption, canopy] =
     await Promise.all([
       fetchManifest(),
       fetchCSV('sources.csv'),
       fetchCSV('inventory_2019.csv'),
+      fetchCSV('inventory_2022.csv'),
       fetchCSV('inventory_2023.csv'),
       fetchCSV('wedge_scenarios.csv'),
       fetchCSV('consumption_based.csv'),
@@ -147,6 +148,7 @@ export async function loadAllData() {
     sourceMap,
     inventory: {
       2019: joinSources(inv2019, sourceMap),
+      2022: joinSources(inv2022, sourceMap),
       2023: joinSources(inv2023, sourceMap),
     },
     wedge: parseWedgeRows(wedge, sourceMap),

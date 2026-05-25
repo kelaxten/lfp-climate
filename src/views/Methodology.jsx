@@ -8,14 +8,16 @@ import { NOTATION_KEYS } from '../lib/gpc.js'
 
 // GPC completeness map — structured data for the table
 const COMPLETENESS = [
-  { sector: 'Stationary Energy (nat. gas)', scope: 1, gpc: 'BASIC', coverage: 'NE', gap: 'Absolute MTCO₂e not yet extracted. Cascadia GHG Inventory Report (separate from Wedge Memo) contains this — pending PDF review.' },
-  { sector: 'Stationary Energy (electricity)', scope: 2, gpc: 'BASIC', coverage: 'NE', gap: 'City-scale electricity totals not available. PSE emissions intensity confirmed (0.377 MTCO₂e/MWh for 2024). CETA requires PSE to be GHG-neutral by 2030.' },
-  { sector: 'Transportation (on-road)', scope: '1+3', gpc: 'BASIC', coverage: 'Confirmed', gap: 'Total on-road 2019/2022/2023 confirmed from Fehr & Peers VMT Study Table 2. Scope 1 vs. 3 split NE (>90% transboundary).' },
-  { sector: 'Transportation (aviation)', scope: 3, gpc: 'BASIC+', coverage: 'NE', gap: 'Included in "all" footprint via Wedge Memo (income-allocated per-capita method). ~32% of all-footprint. Absolute value NE — largest remaining single-sector gap.' },
-  { sector: 'Transportation (off-road)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~6% of "all" per Wedge Memo. Not quantified at city scale.' },
-  { sector: 'Waste (solid + wastewater)', scope: '1+3', gpc: 'BASIC', coverage: 'NE', gap: 'Exported waste = Scope 3. PSREAP has waste data. Cascadia GHG Inventory Report expected to contain LFP-specific figures.' },
-  { sector: 'IPPU (refrigerants)', scope: 1, gpc: 'BASIC+', coverage: 'NE', gap: '~7% of "all" per Wedge Memo. HFC fugitive emissions; not speciated at city scale.' },
-  { sector: 'AFOLU (urban canopy)', scope: 1, gpc: 'BASIC+', coverage: 'Partial', gap: 'Canopy area 1,476.72 ac (49.9%) confirmed from King County DNRP 2016 GIS study. Annual net sequestration and total carbon stock NE — i-Tree Eco/Canopy run needed.' },
+  { sector: 'Stationary Energy (nat. gas)', scope: 1, gpc: 'BASIC', coverage: 'Confirmed', gap: 'Confirmed from Cascadia GHG Inventory Report Table 3: 19,007 / 21,352 / 21,021 MTCO₂e (2019/2022/2023). PSE-provided consumption × utility EFs. Residential/commercial split available.' },
+  { sector: 'Stationary Energy (electricity)', scope: 2, gpc: 'BASIC', coverage: 'Confirmed', gap: 'Confirmed: 1,049 / 950 / 2,909 MTCO₂e. ~99% Seattle City Light. 2023 spike driven by a 352% rise in SCL reported carbon intensity, not consumption. WA Dept. of Ecology utility-specific EFs.' },
+  { sector: 'Stationary Energy (other fuels)', scope: 1, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: fuel oil + propane 2,831 / 4,060 / 3,726 MTCO₂e. WA EIA consumption scaled by population × EPA EF Hub.' },
+  { sector: 'Transportation (on-road)', scope: '1+3', gpc: 'BASIC', coverage: 'Confirmed', gap: 'Confirmed: 25,364 / 23,322 / 23,450 MTCO₂e (matches Fehr & Peers VMT Study). PSRC model + StreetLight adjustment. >90% transboundary (Scope 3).' },
+  { sector: 'Transportation (aviation)', scope: 3, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: 31,916 / 25,484 / 28,452 MTCO₂e — the single largest source. SeaTac jet-A fuel allocated to cities by passenger survey + population + median household income.' },
+  { sector: 'Transportation (off-road)', scope: 1, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: 6,047 / 6,313 / 6,377 MTCO₂e. EPA MOVES model run at county level scaled by city population.' },
+  { sector: 'Waste (solid + compost)', scope: '1+3', gpc: 'BASIC', coverage: 'Confirmed', gap: 'Confirmed: landfill + compost 1,755 / 2,030 / 1,960 MTCO₂e. King County waste characterization × EPA WARM. Exported landfill waste = Scope 3. Wastewater not separately reported.' },
+  { sector: 'IPPU (refrigerants)', scope: 1, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: 7,048 / 7,471 / 7,493 MTCO₂e. High-GWP HFCs from AC/refrigeration, estimated from EPA national inventory scaled by population.' },
+  { sector: 'AFOLU (tree loss / source)', scope: 1, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: 727 / 510 / 510 MTCO₂e from canopy loss (counted in gross total). ICLEI LEARN tool with city GIS boundary.' },
+  { sector: 'AFOLU (sequestration / sink)', scope: 1, gpc: 'BASIC+', coverage: 'Confirmed', gap: 'Confirmed: −5,535 / −5,550 / −5,550 MTCO₂e/yr (ICLEI LEARN). Reported separately from gross emissions (not netted). Offsets ~5.8% of gross. Carbon STOCK still NE — i-Tree Eco.' },
   { sector: 'Consumption-based (CBEI)', scope: 3, gpc: 'BASIC+', coverage: 'Partial', gap: 'Spend-based EEIO estimate: ~123,835 MTCO₂e (±30–40%). EPA SCF v1.3.0 × BLS CE 2019 5th quintile × 5,400 HH. Not confirmed — LFP-specific spending survey or KC PSREAP downscale needed.' },
 ]
 
@@ -86,8 +88,9 @@ export default function Methodology({ data }) {
       <section aria-labelledby="completeness-heading" className="card" style={{ marginBottom: 'var(--sp-5)' }}>
         <h2 id="completeness-heading">§2 GPC Completeness Map</h2>
         <p style={{ marginBottom: 12 }}>
-          Coverage status for each GPC sector × scope combination. "Confirmed" = value in the inventory CSV.
-          "Partial" = narrative % confirmed but absolute MTCO₂e not transcribed. "NE" = not estimated.
+          Coverage status for each GPC sector × scope combination. The territorial inventory is now
+          <strong> fully populated</strong> for 2019, 2022, and 2023 from the Cascadia GHG Inventory Report.
+          "Confirmed" = value in the inventory CSV. "Partial" = estimate only (CBEI). "NE" = not estimated.
         </p>
         <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
           <table aria-label="GPC completeness map">
@@ -150,19 +153,21 @@ export default function Methodology({ data }) {
             BAU/ABAU/Local Action mislabeled as "all") was corrected in <code>wedge_scenarios.csv</code>.
           </li>
           <li style={{ marginBottom: 14 }}>
-            <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
-            <strong>Stationary energy &amp; waste absolute values.</strong> The Cascadia Wedge Memo covers
-            scenario trajectories but not the full sector breakdown with absolute MTCO₂e. The separate
-            <strong> Cascadia GHG Inventory Report</strong> (distinct from the Wedge Memo) is expected to
-            contain building natural gas, electricity, and waste sector absolute values for 2019.
-            Reconciling these will fill the largest remaining NE gaps in the GPC table.
+            <span style={{ background: '#e8f5e9', color: '#1b5e20', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>✅ RESOLVED</span>
+            <strong>Stationary energy, waste, aviation, off-road, refrigerants.</strong> The
+            <strong> Cascadia GHG Inventory Report</strong> (2025) provides the full sector breakdown with
+            absolute MTCO₂e for 2019, 2022, and 2023 — communitywide totals 95,745 / 91,491 / 95,897.
+            All previously-NE sectors are now confirmed in the inventory CSVs. Note this report's total
+            (95,745, 2019) differs ~0.3% from the Wedge Memo baseline (95,996); the inventory is canonical
+            for historical sector values, the Wedge Memo for 2050 scenario trajectories.
           </li>
           <li style={{ marginBottom: 14 }}>
             <span style={{ background: '#e8f5e9', color: '#1b5e20', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>✅ RESOLVED</span>
-            <strong>Canopy cover (#7).</strong> The 2016 King County DNRP GIS study confirms: total city area
-            2,298.31 acres, canopy area 1,476.72 acres, canopy cover 49.9127%. Largest continuous canopy
-            patch: 244.66 acres. Tallest tree: 191 ft (Big Tree Park). Study year is 2016 — a 2019 or
-            current update has not been confirmed.
+            <strong>Canopy cover &amp; sequestration (#7).</strong> The 2016 King County DNRP GIS study confirms
+            canopy area 1,476.72 ac (49.9%), largest patch 244.66 ac, tallest tree 191 ft (Big Tree Park).
+            The GHG Inventory Report adds the confirmed annual sequestration flux (−5,535/−5,550 MTCO₂e/yr,
+            ICLEI LEARN tool) and tree-loss emissions (727/510/510). Only the standing carbon STOCK and
+            tree count remain NE (i-Tree Eco run).
           </li>
           <li style={{ marginBottom: 14 }}>
             <span style={{ background: '#fff8e1', color: '#e65100', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>🔶 PARTIAL</span>
@@ -175,12 +180,13 @@ export default function Methodology({ data }) {
             do not add together; these are separate accounting boundaries.
           </li>
           <li style={{ marginBottom: 14 }}>
-            <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
-            <strong>i-Tree assessment (AFOLU sequestration).</strong> With 1,476.72 confirmed canopy acres,
-            an <strong>i-Tree Canopy</strong> or <strong>i-Tree Eco</strong> run is the logical next step.
-            Regional Pacific Northwest benchmarks suggest ~0.3–1.5 MTCO₂e sequestered per canopy acre per year
-            (440–2,200 MTCO₂e/yr total — 1–5% offset of core emissions). USDA Forest Service tools are free;
-            contact WA DNR Urban &amp; Community Forestry program for facilitation.
+            <span style={{ background: '#fff8e1', color: '#e65100', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>🔶 PARTIAL</span>
+            <strong>i-Tree Eco for canopy carbon STOCK.</strong> Annual sequestration flux is now confirmed
+            via ICLEI LEARN (−5,550 MTCO₂e/yr, ~3.8 MTCO₂e/canopy-acre/yr — higher than generic regional
+            benchmarks, reflecting LFP's mature conifer canopy). What remains NE is the standing carbon
+            <em> stock</em> (tonnes C in biomass) and tree count. With 1,476.72 confirmed canopy acres as
+            input geometry, an <strong>i-Tree Eco</strong> run would close this and refine the LEARN flux.
+            USDA Forest Service tools are free; WA DNR Urban &amp; Community Forestry can facilitate.
           </li>
           <li>
             <span style={{ background: '#fff3e0', color: '#bf360c', fontWeight: 700, fontSize: '0.7rem', padding: '1px 5px', borderRadius: 3, marginRight: 6 }}>⏳ OPEN</span>
