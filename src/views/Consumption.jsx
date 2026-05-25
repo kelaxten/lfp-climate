@@ -22,17 +22,20 @@ const CAT_COLORS = {
   'Transport fuels':  '#bf360c',   // brick red
 }
 
-function ChartCaption({ children }) {
+function ChartCaption({ id, children }) {
   return (
-    <p style={{
-      fontSize: 'var(--text-sm)',
-      color: 'var(--text-muted)',
-      fontStyle: 'italic',
-      marginTop: 8,
-      marginBottom: 0,
-      borderLeft: '3px solid var(--border)',
-      paddingLeft: 10,
-    }}>
+    <p
+      id={id}
+      style={{
+        fontSize: 'var(--text-sm)',
+        color: 'var(--text-muted)',
+        fontStyle: 'italic',
+        marginTop: 8,
+        marginBottom: 0,
+        borderLeft: '3px solid var(--border)',
+        paddingLeft: 10,
+      }}
+    >
       {children}
     </p>
   )
@@ -88,57 +91,79 @@ export default function Consumption({ data }) {
           <p style={{ fontSize: 'var(--text-sm)', marginBottom: 12, color: 'var(--text-muted)' }}>
             Spend-based EEIO estimate. Transport fuels overlap with territorial on-road — see double-count note below.
           </p>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={chartData} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis
-                tickFormatter={(v) => fmtNumber(v)}
-                tick={{ fontSize: 12 }}
-                label={{ value: 'MTCO₂e', angle: -90, position: 'insideLeft', offset: 12, fontSize: 11 }}
-              />
-              <Tooltip
-                formatter={(v, name) => [`${fmtNumber(v)} MTCO₂e`, name]}
-                labelFormatter={(l) => l}
-                contentStyle={{ fontSize: 'var(--text-sm)' }}
-              />
-              <Bar dataKey="value" name="MTCO₂e" radius={[3, 3, 0, 0]}>
-                {chartData.map((entry) => (
-                  <Cell key={entry.name} fill={CAT_COLORS[entry.name] ?? '#888'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-            {chartData.map(d => (
-              <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-xs)' }}>
-                <span style={{ width: 12, height: 12, borderRadius: 2, background: CAT_COLORS[d.name] ?? '#888', display: 'inline-block' }} />
-                {d.name}: <strong>{fmtNumber(d.value)}</strong>
-              </div>
-            ))}
-          </div>
-          <ChartCaption>
-            Source: EPA SCF v1.3.0 × BLS CE 2019 (5th quintile) × 5,400 LFP HH. Uncertainty ±30–40%.
-            Excludes utilities and shelter (would double-count territorial Scope 1/2).
-          </ChartCaption>
+
+          {/* Hidden note for aria-describedby */}
+          <span
+            id="chart-category-table-note"
+            style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+          >
+            Use the &lsquo;Show data table&rsquo; button below to access data in tabular form.
+          </span>
+
+          {/* figure wraps the chart for semantic grouping */}
+          <figure style={{ margin: 0 }}>
+            <div
+              role="img"
+              aria-labelledby="chart-category-caption"
+              aria-describedby="chart-category-table-note"
+            >
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={chartData} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis
+                    tickFormatter={(v) => fmtNumber(v)}
+                    tick={{ fontSize: 12 }}
+                    label={{ value: 'MTCO₂e', angle: -90, position: 'insideLeft', offset: 12, fontSize: 11 }}
+                  />
+                  <Tooltip
+                    formatter={(v, name) => [`${fmtNumber(v)} MTCO₂e`, name]}
+                    labelFormatter={(l) => l}
+                    contentStyle={{ fontSize: 'var(--text-sm)' }}
+                  />
+                  <Bar dataKey="value" name="MTCO₂e" radius={[3, 3, 0, 0]}>
+                    {chartData.map((entry) => (
+                      <Cell key={entry.name} fill={CAT_COLORS[entry.name] ?? '#888'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Visible colour key — serves as non-colour alternative for legend */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }} role="list" aria-label="Chart colour key">
+              {chartData.map(d => (
+                <div key={d.name} role="listitem" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-xs)' }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 2, background: CAT_COLORS[d.name] ?? '#888', display: 'inline-block' }} aria-hidden="true" />
+                  {d.name}: <strong>{fmtNumber(d.value)}</strong>
+                </div>
+              ))}
+            </div>
+
+            <ChartCaption id="chart-category-caption">
+              Source: EPA SCF v1.3.0 × BLS CE 2019 (5th quintile) × 5,400 LFP HH. Uncertainty ±30–40%.
+              Excludes utilities and shelter (would double-count territorial Scope 1/2).
+            </ChartCaption>
+          </figure>
 
           <button
             onClick={() => setShowTable(v => !v)}
             aria-expanded={showTable}
+            aria-controls="consumption-data-table"
             style={{ marginTop: 12, background: 'none', border: '1px solid var(--border)', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}
           >
             {showTable ? 'Hide' : 'Show'} data table
           </button>
           {showTable && (
-            <div style={{ overflowX: 'auto', marginTop: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+            <div id="consumption-data-table" style={{ overflowX: 'auto', marginTop: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
               <table aria-label="Consumption-based emissions by category">
                 <thead>
                   <tr>
-                    <th>Category</th>
-                    <th style={{ textAlign: 'right' }}>MTCO₂e</th>
-                    <th>% of CBEI</th>
-                    <th>Method</th>
-                    <th>Source</th>
+                    <th scope="col">Category</th>
+                    <th scope="col" style={{ textAlign: 'right' }}>MTCO₂e</th>
+                    <th scope="col">% of CBEI</th>
+                    <th scope="col">Method</th>
+                    <th scope="col">Source</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -147,7 +172,13 @@ export default function Consumption({ data }) {
                       <td style={{ fontWeight: row.category === 'Total consumption-based' ? 700 : 500 }}>
                         {row.category}
                         {row.category === 'Transport fuels' && (
-                          <span title="Overlaps with territorial Scope 1 on-road" style={{ marginLeft: 4, color: 'var(--color-amber)' }}>⚠</span>
+                          <span
+                            aria-label="Warning: overlaps with territorial Scope 1 on-road"
+                            title="Overlaps with territorial Scope 1 on-road"
+                            style={{ marginLeft: 4, color: 'var(--color-amber)' }}
+                          >
+                            ⚠
+                          </span>
                         )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
@@ -177,54 +208,88 @@ export default function Consumption({ data }) {
           <p style={{ fontSize: 'var(--text-sm)', marginBottom: 12, color: 'var(--text-muted)' }}>
             Consumption-based vs. territorial (GPC) accounting. These are <strong>separate boundary frameworks</strong> — do not add them.
           </p>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={compData} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis
-                tickFormatter={(v) => fmtNumber(v)}
-                tick={{ fontSize: 12 }}
-                label={{ value: 'MTCO₂e', angle: -90, position: 'insideLeft', offset: 12, fontSize: 11 }}
-              />
-              <Tooltip
-                formatter={(v) => [`${fmtNumber(v)} MTCO₂e`]}
-                contentStyle={{ fontSize: 'var(--text-sm)' }}
-              />
-              <Bar dataKey="value" name="MTCO₂e" radius={[3, 3, 0, 0]}>
-                {compData.map((entry) => (
-                  <Cell key={entry.name} fill={entry.fill} opacity={entry.confirmed ? 1 : 0.75} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          <div style={{ marginTop: 8, fontSize: 'var(--text-sm)' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial core 2019</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e</td>
-                  <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC, Scope 1+2+3 local)</td>
-                </tr>
-                <tr>
-                  <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial all 2019</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e</td>
-                  <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC+, includes aviation + wider Scope 3)</td>
-                </tr>
-                <tr style={{ background: '#fff3e0' }}>
-                  <td style={{ padding: '4px 8px', fontWeight: 600 }}>CBEI total (estimate)</td>
-                  <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>{fmtNumber(Math.round(totalCBEI))} MTCO₂e</td>
-                  <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
-                    Spend-based EEIO estimate ±30–40%.{' '}
-                    {((totalCBEI / cf.core_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger than territorial core.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <ChartCaption>
-            Territorial figures confirmed from Cascadia Wedge Memo. CBEI is a spend-based EEIO estimate —
-            see methodology box below. Shaded bar = estimate only.
-          </ChartCaption>
+
+          {/* Screen-reader summary of comparison chart values */}
+          <p className="sr-only">
+            Chart summary: Territorial core 2019 is {fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e (confirmed);
+            Territorial all 2019 is {fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e (confirmed);
+            CBEI total estimate is {fmtNumber(Math.round(totalCBEI))} MTCO₂e (spend-based estimate, uncertainty ±30–40%).
+          </p>
+
+          {/* Hidden note for aria-describedby */}
+          <span
+            id="chart-comp-table-note"
+            style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+          >
+            Use the data summary table below to access these values in tabular form.
+          </span>
+
+          {/* figure wraps the chart for semantic grouping */}
+          <figure style={{ margin: 0 }}>
+            <div
+              role="img"
+              aria-labelledby="chart-comp-caption"
+              aria-describedby="chart-comp-table-note"
+            >
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={compData} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    tickFormatter={(v) => fmtNumber(v)}
+                    tick={{ fontSize: 12 }}
+                    label={{ value: 'MTCO₂e', angle: -90, position: 'insideLeft', offset: 12, fontSize: 11 }}
+                  />
+                  <Tooltip
+                    formatter={(v) => [`${fmtNumber(v)} MTCO₂e`]}
+                    contentStyle={{ fontSize: 'var(--text-sm)' }}
+                  />
+                  <Bar dataKey="value" name="MTCO₂e" radius={[3, 3, 0, 0]}>
+                    {compData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.fill} opacity={entry.confirmed ? 1 : 0.75} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div style={{ marginTop: 8, fontSize: 'var(--text-sm)' }}>
+              <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                <thead className="sr-only">
+                  <tr>
+                    <th scope="col">Accounting boundary</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial core 2019</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.core_baseline_2019_mtco2e)} MTCO₂e</td>
+                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC, Scope 1+2+3 local)</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '4px 8px', fontWeight: 500 }}>Territorial all 2019</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right' }}>{fmtNumber(cf.all_baseline_2019_mtco2e)} MTCO₂e</td>
+                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>Confirmed ✓ (GPC BASIC+, includes aviation + wider Scope 3)</td>
+                  </tr>
+                  <tr style={{ background: '#fff3e0' }}>
+                    <td style={{ padding: '4px 8px', fontWeight: 600 }}>CBEI total (estimate)</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 600 }}>{fmtNumber(Math.round(totalCBEI))} MTCO₂e</td>
+                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+                      Spend-based EEIO estimate ±30–40%.{' '}
+                      {((totalCBEI / cf.core_baseline_2019_mtco2e - 1) * 100).toFixed(0)}% larger than territorial core.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <ChartCaption id="chart-comp-caption">
+              Territorial figures confirmed from Cascadia Wedge Memo. CBEI is a spend-based EEIO estimate —
+              see methodology box below. Shaded bar = estimate only.
+            </ChartCaption>
+          </figure>
         </div>
       )}
 
