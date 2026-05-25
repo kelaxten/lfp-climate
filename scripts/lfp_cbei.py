@@ -29,8 +29,8 @@ OUT_PATH = os.path.join(os.path.dirname(__file__), '../public/data/consumption_b
 # 1. LFP PARAMETERS
 # ─────────────────────────────────────────────────────────────────────────────
 LFP_HOUSEHOLDS = 5_400          # ACS 2019-2023 occupied housing units (5,392 rounded)
-LFP_CORE_BASELINE = 47_427      # MTCO₂e, 2019 core territorial (confirmed)
-LFP_ALL_BASELINE  = 95_996      # MTCO₂e, 2019 all-footprint territorial (confirmed)
+LFP_TERRITORIAL = 95_745        # MTCO₂e, 2019 communitywide territorial (Cascadia GHG Inventory, canonical)
+LFP_CORE_BASELINE = 47_427      # MTCO₂e, 2019 Wedge Memo "core" subset (legacy comparison)
 
 # CPI adjustment: 2019 → 2022 USD (Bureau of Labor Statistics CPI-U)
 # CPI-U 2019 annual avg = 255.657; 2022 annual avg = 296.808
@@ -273,11 +273,10 @@ for cat, val in sorted(category_totals.items(), key=lambda x: -x[1]):
 print(f"  {'TOTAL':<22} {total_cbei:>8,.1f} MTCO₂e")
 
 print("\n── Comparison to territorial inventory ───────────────────────────────")
-print(f"  Territorial core 2019:    {LFP_CORE_BASELINE:>8,} MTCO₂e")
-print(f"  Territorial all 2019:     {LFP_ALL_BASELINE:>8,} MTCO₂e")
-print(f"  Consumption-based (CBEI): {total_cbei:>8,.0f} MTCO₂e")
-print(f"  CBEI / territorial core:  {total_cbei/LFP_CORE_BASELINE:.2f}× ({(total_cbei/LFP_CORE_BASELINE-1)*100:.0f}% larger)")
-print(f"  CBEI / territorial all:   {total_cbei/LFP_ALL_BASELINE:.2f}× ({(total_cbei/LFP_ALL_BASELINE-1)*100:.0f}% larger)")
+print(f"  Territorial communitywide 2019: {LFP_TERRITORIAL:>8,} MTCO₂e (Cascadia GHG Inventory)")
+print(f"  Consumption-based (CBEI):       {total_cbei:>8,.0f} MTCO₂e")
+print(f"  CBEI / territorial:             {total_cbei/LFP_TERRITORIAL:.2f}× ({(total_cbei/LFP_TERRITORIAL-1)*100:.0f}% larger)")
+print(f"  (legacy) CBEI / Wedge core:     {total_cbei/LFP_CORE_BASELINE:.2f}×")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. WRITE consumption_based.csv
@@ -314,7 +313,7 @@ for cat in CAT_ORDER:
             f"Excludes: utilities/energy (counted in territorial Scope 1/2), shelter mortgage/rent (not a direct emission). "
             f"⚠ Transport fuels ({category_totals.get('Transport fuels',0):,.0f} MTCO₂e) overlap with territorial Scope 1 on-road — "
             f"do not add to territorial. "
-            f"CBEI is {total_cbei/LFP_CORE_BASELINE:.1f}× territorial core ({LFP_CORE_BASELINE:,} MTCO₂e). "
+            f"CBEI is {total_cbei/LFP_TERRITORIAL:.1f}× the territorial communitywide total ({LFP_TERRITORIAL:,} MTCO₂e, Cascadia GHG Inventory). "
             f"Methodology: EPA SupplyChainGHGEmissionFactors_v1.3.0 × BLS CE 2019 5th quintile × 5,400 LFP HH × CPI 2019→2022. "
             f"Uncertainty: ±30–40% given spending assumptions and NAICS mapping."
         )
