@@ -9,7 +9,7 @@
   "available_years": [2019, 2023],
   "wedge_value_basis": "percent_of_2019",
   "carbon_to_co2e_factor": 3.6667,
-  "disclaimer": "DRAFT FOR REVIEW. Primary source PDFs (Cascadia Wedge Memo, Fehr & Peers VMT Study) have been reviewed and wedge scenario and on-road figures are now confirmed. Stationary energy (natural gas, electricity) and waste sector absolute values remain NE pending additional source data. Consumption-based (#6) and canopy/AFOLU (#7) figures require a King County CBEI downscale and an i-Tree assessment respectively, and are currently NE placeholders. Do not cite as final.",
+  "disclaimer": "DRAFT FOR REVIEW. Primary source PDFs (Cascadia Wedge Memo, Fehr & Peers VMT Study) have been reviewed and wedge scenario and on-road figures are now confirmed. Stationary energy (natural gas, electricity) and waste sector absolute values remain NE pending additional source data. Consumption-based (#6) now shows a spend-based EEIO estimate (EPA SCF v1.3.0 × BLS CE 2019 5th quintile × 5,400 HH) with ±30-40% uncertainty — not confirmed, treat as order-of-magnitude. Canopy/AFOLU (#7) area and cover are confirmed from 2016 King County study; sequestration/stock remain NE pending i-Tree. Do not cite as final.",
   "notation_keys": {
     "IE": "Included Elsewhere",
     "NE": "Not Estimated",
@@ -45,6 +45,16 @@
     "canopy_pct_2016": 49.9127,
     "canopy_area_acres_2016": 1476.72,
     "city_area_acres": 2298.31,
-    "canopy_study_year": 2016
+    "canopy_study_year": 2016,
+    "cbei_total_mtco2e_estimate": 123835,
+    "cbei_food_mtco2e_estimate": 29640,
+    "cbei_goods_mtco2e_estimate": 32730,
+    "cbei_services_mtco2e_estimate": 32954,
+    "cbei_construction_mtco2e_estimate": 11626,
+    "cbei_transport_fuels_mtco2e_estimate": 16886,
+    "cbei_method": "EEIO-spend-BLS-5th-quintile",
+    "cbei_uncertainty_pct": 35,
+    "cbei_households": 5400,
+    "cbei_source": "EPA-SCF-v1.3.0-x-BLS-CE-2019-5th-quintile"
   }
 }
